@@ -20,6 +20,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    const toolCollection = client
+      .db("refrigerator_instruments")
+      .collection("tools");
 
     //generate token
     app.get("/token/:email", (req, res) => {
@@ -33,6 +36,13 @@ async function run() {
         }
       );
       res.send({ token: token });
+    });
+
+    // find all parts
+    app.get("/tool", async (req, res) => {
+      const query = {};
+      const tools = await toolCollection.find(query).toArray();
+      res.send(tools);
     });
   } finally {
     // await client.close();
