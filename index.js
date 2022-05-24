@@ -24,6 +24,13 @@ async function run() {
       .db("refrigerator_instruments")
       .collection("tools");
 
+    const orderCollection = client
+      .db("refrigerator_instruments")
+      .collection("orders");
+    const reviewCollection = client
+      .db("refrigerator_instruments")
+      .collection("reviews");
+
     //generate token
     app.get("/token/:email", (req, res) => {
       const email = req.params.email;
@@ -51,6 +58,27 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const tool = await toolCollection.findOne(query);
       res.send(tool);
+    });
+
+    // purchase order
+    app.post("/order", async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
+      res.send(result);
+    });
+
+    // add review
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    // get review
+    app.get("/review", async (req, res) => {
+      const query = {};
+      const reviews = await reviewCollection.find(query).toArray();
+      res.send(reviews);
     });
   } finally {
     // await client.close();
