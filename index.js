@@ -66,6 +66,13 @@ async function run() {
       const result = await orderCollection.insertOne(order);
       res.send(result);
     });
+    // get all order
+    app.get("/order/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const orders = await orderCollection.find(query).toArray();
+      res.send(orders);
+    });
 
     // add review
     app.post("/review", async (req, res) => {
