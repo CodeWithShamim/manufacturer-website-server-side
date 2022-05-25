@@ -50,11 +50,27 @@ async function run() {
       res.send({ token: token });
     });
 
-    // find all parts
+    // find all tools
     app.get("/tool", async (req, res) => {
       const query = {};
       const tools = await toolCollection.find(query).toArray();
       res.send(tools);
+    });
+
+    // add new tool
+    app.post("/tool", async (req, res) => {
+      const tool = req.body;
+      console.log(tool);
+      const result = await toolCollection.insertOne(tool);
+      res.send(result);
+    });
+
+    // delete tool by id
+    app.delete("/tool/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await toolCollection.deleteOne(query);
+      res.send(result);
     });
 
     // find specific data
