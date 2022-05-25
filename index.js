@@ -87,6 +87,21 @@ async function run() {
       res.send(order);
     });
 
+    // update payment order by id
+    app.patch("/order/:id", async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const result = await orderCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     // delete specific order
     app.delete("/order/:id", async (req, res) => {
       const id = req.params.id;
