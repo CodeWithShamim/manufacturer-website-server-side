@@ -30,6 +30,9 @@ async function run() {
     const reviewCollection = client
       .db("refrigerator_instruments")
       .collection("reviews");
+    const profileCollection = client
+      .db("refrigerator_instruments")
+      .collection("profiles");
 
     //generate token
     app.get("/token/:email", (req, res) => {
@@ -94,6 +97,29 @@ async function run() {
       const query = {};
       const reviews = await reviewCollection.find(query).toArray();
       res.send(reviews);
+    });
+
+    // add profile
+    app.put("/profile", async (req, res) => {
+      const profile = req.body;
+      const filter = { email: profile.email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: profile,
+      };
+      const result = await profileCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+    // add profile
+    app.get("/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await profileCollection.findOne(query);
+      res.send(result);
     });
   } finally {
     // await client.close();
