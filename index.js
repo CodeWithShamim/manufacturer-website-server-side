@@ -142,8 +142,9 @@ async function run() {
     });
 
     // delete tool by id
-    app.delete("/tool/:id", verifyJwt, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
+    app.delete("/tool/:email", verifyJwt, verifyAdmin, async (req, res) => {
+      const id = req.body.id;
+      console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await toolCollection.deleteOne(query);
       res.send(result);
@@ -211,7 +212,7 @@ async function run() {
     });
 
     // add review
-    app.post("/review", async (req, res) => {
+    app.post("/review", verifyJwt, async (req, res) => {
       const review = req.body;
       const result = await reviewCollection.insertOne(review);
       res.send(result);
@@ -220,8 +221,8 @@ async function run() {
     // get review
     app.get("/review", async (req, res) => {
       const query = {};
-      const reviews = await reviewCollection.find(query).toArray();
-      res.send(reviews);
+      const reviews = await reviewCollection.find(query).limit(8).toArray();
+      res.send(reviews.reverse());
     });
 
     // add profile
