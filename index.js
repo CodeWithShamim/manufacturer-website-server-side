@@ -14,12 +14,13 @@ app.use(express.json());
 // _____create middleware for verify jwt token_________
 const verifyJwt = (req, res, next) => {
   const authHeader = req.headers.authorization;
+  console.log(authHeader);
   if (!authHeader) {
     return res.status(401).send({ message: "Unauthorized access" });
   }
 
   const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN_PRIVATE, (err, decoded) => {
     if (err) {
       return res.status(403).send({ message: "Forbidden access" });
     }
@@ -55,6 +56,20 @@ async function run() {
       .db("refrigerator_instruments")
       .collection("users");
 
+    // _____________________________________
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const user = await userCollection.findOne(filter);
+      const isAdmin = user?.role === "admin";
+      if (isAdmin) {
+        next();
+      } else {
+        return res.send(false);
+      }
+    };
+
     // create user & generate token
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -85,8 +100,8 @@ async function run() {
     });
 
     // update specific user by id
-    app.patch("/user/:id", async (req, res) => {
-      const id = req.params.id;
+    app.patch("/user/:email", verifyAdmin, async (req, res) => {
+      const id = req.body.id;
       const filter = { _id: ObjectId(id) };
       const updateDoc = {
         $set: {
@@ -99,17 +114,12 @@ async function run() {
 
     // _____________________________________
     // verify admin
-    app.get("/admin/:email", async (req, res) => {
-      const email = req.params.email;
-      const filter = { email: email };
-      const user = await userCollection.findOne(filter);
-      console.log(user);
-      const isAdmin = user?.role === "admin";
-      res.json(isAdmin);
+    app.get("/admin/:email", verifyAdmin, async (req, res) => {
+      res.send(true);
     });
 
     // delete specific user by id
-    app.delete("/user/:id", async (req, res) => {
+    app.delete("/user/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await userCollection.deleteOne(query);
@@ -132,7 +142,7 @@ async function run() {
     });
 
     // delete tool by id
-    app.delete("/tool/:id", async (req, res) => {
+    app.delete("/tool/:id", verifyJwt, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await toolCollection.deleteOne(query);
@@ -193,7 +203,7 @@ async function run() {
     });
 
     // delete specific order
-    app.delete("/order/:id", async (req, res) => {
+    app.delete("/order/:id", verifyJwt, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await orderCollection.deleteOne(query);
