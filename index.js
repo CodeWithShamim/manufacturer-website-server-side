@@ -221,7 +221,7 @@ async function run() {
     // get review
     app.get("/review", async (req, res) => {
       const query = {};
-      const reviews = await reviewCollection.find(query).limit(8).toArray();
+      const reviews = await await reviewCollection.find(query).toArray();
       res.send(reviews.reverse());
     });
 
