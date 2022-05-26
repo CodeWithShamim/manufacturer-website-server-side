@@ -97,6 +97,17 @@ async function run() {
       res.send(result);
     });
 
+    // _____________________________________
+    // verify admin
+    app.get("/admin/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const user = await userCollection.findOne(filter);
+      console.log(user);
+      const isAdmin = user?.role === "admin";
+      res.json(isAdmin);
+    });
+
     // delete specific user by id
     app.delete("/user/:id", async (req, res) => {
       const id = req.params.id;
