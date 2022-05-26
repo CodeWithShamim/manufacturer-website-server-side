@@ -77,6 +77,13 @@ async function run() {
       res.send({ result, token });
     });
 
+    // get all user
+    app.get("/user", async (req, res) => {
+      const query = {};
+      const users = await userCollection.find(query).toArray();
+      res.send(users);
+    });
+
     // find all tools
     app.get("/tool", async (req, res) => {
       const query = {};
