@@ -129,7 +129,7 @@ async function run() {
     // find all tools
     app.get("/tool", async (req, res) => {
       const query = {};
-      const tools = await toolCollection.find(query).limit(9).toArray();
+      const tools = await toolCollection.find(query).toArray();
       res.send(tools.reverse());
     });
 
